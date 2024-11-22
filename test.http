@@ -1,0 +1,18 @@
+﻿###
+POST http://localhost:8000/o/token/
+Content-Type: application/x-www-form-urlencoded
+
+"grant_type": "password"&"username":"advent"&"password": "zjy82knPeDviEY3em5VKyGtSqu0pKhNF"&"client_id":"0TZKK4gBhO0rxuoSHUAPUUO7MtG6vmW60hlqP3YK"&"client_secret":"pbkdf2_sha256$870000$hNcCCZAAmFHAtjQcCmg84P$gjyWdzdoyZIjnFxOKXefwcAHOF1e6u24gpwZp7T6K/4="
+
+
+> {% 
+
+client.test("", function (){
+    client.assert(response.status === 200) 
+}) 
+ 
+%}
+
+###
+GET http://localhost:8000/api/hello/
+Authorization: Bearer {{}}
