@@ -14,5 +14,47 @@ client.test("", function (){
 %}
 
 ###
-GET http://localhost:8000/api/hello/
-Authorization: Bearer {{}}
+POST http://localhost:8000/api/auth/register/
+Content-Type: application/json
+
+{
+    "username": "newuser",
+    "password": "StrongPassword123!",
+    "password2": "StrongPassword123!",
+    "email": "newuser@example.com",
+    "full_name": "Новий Користувач",
+    "address": "Вул. Приклад, 1",
+    "region": "Прикладний регіон",
+    "grade": "7"
+}
+
+###
+POST http://localhost:8000/api/auth/token/
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&username=newuser&password=StrongPassword123!&client_id=C1YnpeflFttpb22e989xBtbOLfzsYZnWDzYxKY0G&client_secret=juolXpOVnX1Lv6JpTjZHmzxHHiqAMtW4
+
+> {%
+    client.global.set("studentToken", response.body.access_token);
+%}
+
+###
+POST http://localhost:8000/api/auth/password-reset/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+    "email": "newuser@example.com"
+}
+
+
+###
+POST http://localhost:8000/api/auth/password-reset-complete/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+    "password": "NewStrongPassword123!",
+    "token": "reset_token_received_via_email",
+    "uidb64": "encoded_uid_from_email"
+}

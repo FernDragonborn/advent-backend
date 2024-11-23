@@ -11,9 +11,9 @@ class User(AbstractUser):
     @property
     def group(self):
         group = None
-        if self.grade < 7:
+        if self.grade and int(self.grade) < 7:
             group = 1
-        elif self.grade > 8:
+        elif self.grade and int(self.grade) > 8:
             group = 3
         else:
             group = 2
