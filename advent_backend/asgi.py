@@ -1,5 +1,5 @@
 """
-ASGI config for advent_calendar project.
+ASGI config for advent_backend project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'advent_calendar.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'advent_backend.settings')
 
 application = get_asgi_application()

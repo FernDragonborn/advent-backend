@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 
-from advent_calendar import settings
+from advent_backend import settings
 
 
 class TaskListView(generics.ListAPIView):

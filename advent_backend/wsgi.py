@@ -1,5 +1,5 @@
 """
-WSGI config for advent_calendar project.
+WSGI config for advent_backend project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'advent_calendar.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'advent_backend.settings')
 
 application = get_wsgi_application()
