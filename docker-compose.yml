@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=advent_calendar_db
+      - POSTGRES_USER=advent
+      - POSTGRES_PASSWORD=json
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: gunicorn advent_backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://advent:json@db:5432/advent_backend
+      - SECRET_KEY=vbmrd73_0thn9$goi-rb-py0ar9%zkmh4^k^rlem39nvm-h5v^
+      - DEBUG=0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
+      # Додайте інші змінні середовища за потребою
+
+volumes:
+  postgres_data:

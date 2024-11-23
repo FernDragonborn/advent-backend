@@ -10,8 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+import environ
+from pathlib import Path
+
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+environ.Env.read_env(env_file=os.path.join(Path(__file__).resolve().parent.parent, '.env'))
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+DEBUG = env('DEBUG')
+
+SECRET_KEY = env('SECRET_KEY')
+
+ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,8 +55,9 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'oauth2_provider',
-    'advent_app.apps.AdventAppConfig',
     "verify_email.apps.VerifyEmailConfig",
+
+    'advent_app.apps.AdventAppConfig',
 ]
 
 MIDDLEWARE = [
@@ -80,15 +95,9 @@ WSGI_APPLICATION = 'advent_calendar.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'advent_calendar',
-        'USER': 'postgres',
-        'PASSWORD': 'json',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': env.db('DATABASE_URL')
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -123,18 +132,17 @@ PASSWORD_HASHERS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -148,12 +156,12 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ),
+    )
 }
 
 OAUTH2_PROVIDER = {
     'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
-    'REFRESH_TOKEN_EXPIRE_SECONDS': 1209600, 
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 1209600,
     'AUTHORIZATION_CODE_EXPIRE_SECONDS': 300,
     'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.OAuthLibCore',
     'SCOPES': {
@@ -167,7 +175,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_ID') 
+EMAIL_HOST_USER = os.environ.get('EMAIL_ID')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PW')
 
 DEFAULT_FROM_EMAIL = 'noreply<no_reply@domain.com>'
