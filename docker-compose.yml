@@ -4,7 +4,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=advent_backend
+      - POSTGRES_DB=advent
       - POSTGRES_USER=advent
       - POSTGRES_PASSWORD=json
     ports:
@@ -17,7 +17,7 @@ services:
       
   web:
     build: .
-    command: gunicorn advent_backend.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn advent.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -26,7 +26,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://advent:json@db:5432/advent_backend
+      - DATABASE_URL=postgres://advent:json@db:5432/advent
       - SECRET_KEY=vbmrd73_0thn9$goi-rb-py0ar9%zkmh4^k^rlem39nvm-h5v^
       - DEBUG=0
       #- ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com

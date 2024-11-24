@@ -1,7 +1,7 @@
 # Базовий образ
 FROM python:3.12-slim
 
-# Встановлення залежностей системи
+# Встановлення системних залежностей
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
@@ -11,24 +11,20 @@ RUN apt-get update && apt-get install -y \
 # Встановлення робочої директорії
 WORKDIR /app
 
-# Копіювання файлів проекту
-COPY . /app/
-
-# Встановлення права на виконання
-RUN chmod +x /app/entrypoint.sh
+# Копіювання файлів вимог
+COPY requirements.txt .
 
 # Встановлення Python залежностей
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Копіювання скрипту entrypoint
-COPY entrypoint.sh /app/
+# Копіювання решти файлів проекту
+COPY . .
 
-# Встановлення права на виконання (якщо ще не встановлено)
+# Встановлення права на виконання для entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Визначення точки входу
-ENTRYPOINT ["/app/entrypoint.sh"]
+#ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Відкриття порту
 EXPOSE 8000

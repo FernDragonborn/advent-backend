@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
 
-    'advent_app.apps.AdventAppConfig',
+    'advent_app',
 ]
 
 MIDDLEWARE = [
