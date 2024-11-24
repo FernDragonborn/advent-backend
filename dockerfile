@@ -1,35 +1,34 @@
-# Dockerfile
-
-# Використовуємо офіційний Python образ як базовий
+# Базовий образ
 FROM python:3.12-slim
 
-# Встановлюємо змінні середовища для покращення безпеки та продуктивності
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Встановлюємо робочу директорію
-WORKDIR /app
-
-# Встановлюємо системні залежності
+# Встановлення залежностей системи
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    bash \
     && rm -rf /var/lib/apt/lists/*
 
-# Копіюємо файл вимог і встановлюємо залежності
-COPY requirements.txt /app/
+# Встановлення робочої директорії
+WORKDIR /app
+
+# Копіювання файлів проекту
+COPY . /app/
+
+# Встановлення права на виконання
+RUN chmod +x /app/entrypoint.sh
+
+# Встановлення Python залежностей
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Копіюємо решту коду додатку
-COPY . /app/
-COPY .env /app/
+# Копіювання скрипту entrypoint
+COPY entrypoint.sh /app/
 
-# Збираємо статичні файли
-RUN python manage.py collectstatic --noinput
+# Встановлення права на виконання (якщо ще не встановлено)
+RUN chmod +x /app/entrypoint.sh
 
-# Відкриваємо порт 8000
+# Визначення точки входу
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Відкриття порту
 EXPOSE 8000
-
-# Вказуємо команду для запуску Gunicorn
-CMD ["gunicorn", "advent_backend.wsgi:application", "--bind", "0.0.0.0:8000"]

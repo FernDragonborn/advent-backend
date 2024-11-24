@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
+
 import environ
 from pathlib import Path
 
@@ -25,7 +27,7 @@ DEBUG = env('DEBUG')
 
 SECRET_KEY = env('SECRET_KEY')
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
+#ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,6 +59,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'verify_email.apps.VerifyEmailConfig',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
 
     'advent_app.apps.AdventAppConfig',
 ]
@@ -152,7 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -161,15 +164,12 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-OAUTH2_PROVIDER = {
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
-    'REFRESH_TOKEN_EXPIRE_SECONDS': 1209600,
-    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 300,
-    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.OAuthLibCore',
-    'SCOPES': {
-        'read': 'Read scope',
-        'write': 'Write scope',
-    }
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 

@@ -10,6 +10,11 @@ from .views import (
     SetNewPasswordAPIView,
 )
 from oauth2_provider.views import TokenView, RevokeTokenView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='auth_register'),
@@ -17,6 +22,8 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('token/', TokenView.as_view(), name='token_obtain_pair'),
     path('revoke-token/', RevokeTokenView.as_view(), name='token_revoke'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), 
+
 
     # Endpoints для скидання пароля
     path('password-reset/', RequestPasswordResetEmail.as_view(), name='password_reset'),
