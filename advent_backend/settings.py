@@ -99,7 +99,14 @@ WSGI_APPLICATION = 'advent_backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db('DATABASE_URL')
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'advent_calendar',
+        'USER': 'postgres',
+        'PASSWORD': 'json',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 
