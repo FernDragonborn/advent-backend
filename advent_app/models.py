@@ -25,7 +25,7 @@ class TaskGroups(models.TextChoices):
     THIRD = "Third group"
 
 class Task(models.Model):
-    group = models.SmallIntegerField(choices=TaskGroups)
+    group = models.CharField(choices=TaskGroups.choices, default=TaskGroups.FIRST, max_length=255)
     due_date = models.DateTimeField()
     intro_text = models.TextField(null=True)
     outro_text = models.TextField(null=True)
