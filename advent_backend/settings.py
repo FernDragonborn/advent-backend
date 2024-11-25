@@ -42,7 +42,7 @@ SECRET_KEY = 'django-insecure-+9)nd37&39fonynng@4_xm%k!2r04xw)ybiexblo+dgt(g+t!q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -99,16 +99,8 @@ WSGI_APPLICATION = 'advent_backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'advent_calendar',
-        'USER': 'postgres',
-        'PASSWORD': 'json',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': env.db('DATABASE_URL')
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
