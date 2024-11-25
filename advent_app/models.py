@@ -19,10 +19,10 @@ class User(AbstractUser):
             group = 2
         return group
     
-class TaskGroups(models.IntegerChoices):
-    FIRST = 1, "First group"
-    SECOND = 2, "Second group"
-    THIRD = 3, "Third group"
+class TaskGroups(models.TextChoices):
+    FIRST = "First group"
+    SECOND = "Second group"
+    THIRD = "Third group"
 
 class Task(models.Model):
     group = models.SmallIntegerField(choices=TaskGroups)
