@@ -33,7 +33,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email', 'password', 'region', 'grade', 'gender','phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -44,7 +44,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            phone_number=validated_data.get('phone_number', ''),
+            phone_number=validated_data['phone_number'],
+            gender=validated_data['gender'],
+            region=validated_data['region'],
+            grade=validated_data['grade'],
             is_active=False  # Set user as inactive initially
         )
 
