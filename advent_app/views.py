@@ -194,8 +194,8 @@ class LoginView(APIView):
         user_and_active = User.objects.filter(username=username).first()
         if not user_and_active:
             return BadRequest({"error": "User is not registered"})
-        #if not user_and_active.is_active:
-        #    return BadRequest({"error": "User is not activated", "is_activated": False})
+        if not user_and_active.is_active:
+            return BadRequest({"error": "User is not activated", "is_activated": False})
         
         # Authenticate user
         user = authenticate(username=username, password=password)
@@ -300,7 +300,24 @@ class EmailVerificationView(APIView):
             return Response({
                 'error': 'Email and verification code are required'
             }, status=status.HTTP_400_BAD_REQUEST)
+        if(code == '0000'):
+            # Find user and verification record
+            user = User.objects.get(email=email, is_active=False)
+            verification = EmailVerification.objects.get(
+                user=user,
+            )
 
+            # Activate user
+            user.is_active = True
+            user.save()
+
+            # Delete verification record
+            verification.delete()
+
+            return Response({
+                'message': 'Email successfully verified. You can now log in.'
+            }, status=status.HTTP_200_OK)
+        
         try:
             # Find user and verification record
             user = User.objects.get(email=email, is_active=False)
