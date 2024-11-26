@@ -7,10 +7,13 @@ from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
+from drf_social_oauth2.views import TokenView
 
 from drf_spectacular.openapi import AutoSchema
+from drf_spectacular.utils import extend_schema
 from oauth2_provider.models import Application
 from oauth2_provider.views import RevokeTokenView
+from psycopg import transaction
 
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegistrationSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
@@ -53,7 +56,8 @@ class RegistrationView(APIView):
     View for user registration
     """
     permission_classes = [AllowAny]
-
+    serializer_class = UserSerializer
+    
     def post(self, request):
         """
         Handle user registration
@@ -164,40 +168,6 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
         return Response({"detail": "Пароль успішно змінено."}, status=status.HTTP_200_OK)
 
 
-from oauth2_provider.views import TokenView
-from drf_spectacular.utils import extend_schema
-
-
-@extend_schema(
-    tags=["Authentication"],
-    operation_id="token_obtain",
-    description="Отримання токену через OAuth2",
-    request={
-        "application/x-www-form-urlencoded": {
-            "type": "object",
-            "properties": {
-                "grant_type": {"type": "string", "example": "password"},
-                "client_id": {"type": "string", "example": "your-client-id"},
-                "client_secret": {"type": "string", "example": "your-client-secret"},
-                "username": {"type": "string", "example": "user@example.com"},
-                "password": {"type": "string", "example": "your-password"},
-            },
-            "required": ["grant_type", "client_id", "client_secret", "username", "password"],
-        }
-    },
-    responses={
-        200: {
-            "type": "object",
-            "properties": {
-                "access_token": {"type": "string"},
-                "refresh_token": {"type": "string"},
-                "expires_in": {"type": "integer"},
-                "token_type": {"type": "string", "example": "Bearer"},
-            },
-        },
-        400: {"type": "object", "properties": {"error": {"type": "string"}}},
-    },
-)
 class LoginView(APIView):
     """
     API View for user login using Django REST Framework
@@ -246,7 +216,6 @@ class LoginView(APIView):
             'error': 'Invalid Credentials'
         }, status=status.HTTP_401_UNAUTHORIZED)
 
-
 class LogoutView(APIView):
     """
     API View for user logout using Django REST Framework
@@ -254,6 +223,7 @@ class LogoutView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    
     def post(self, request):
         """
         Handle user logout
