@@ -65,7 +65,7 @@ class RegistrationView(APIView):
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticated, TokenHasReadWriteScope)
+    permission_classes = (IsAuthenticated, """TokenHasReadWriteScope""")
     serializer_class = UserSerializer
     schema = AutoSchema()
     
