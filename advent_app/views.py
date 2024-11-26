@@ -2,30 +2,27 @@ from audioop import reverse
 from email.message import EmailMessage
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.http import JsonResponse
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth.models import update_last_login
+
 from drf_spectacular.openapi import AutoSchema
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasReadWriteScope
 from oauth2_provider.views import RevokeTokenView
 
-from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegisterSerializer,
+from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegistrationSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
                                     ResetPasswordEmailRequestSerializer)
-from advent_app.models import User, Task, TaskResponse
+from advent_app.models import User, Task, TaskResponse, EmailVerification
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import get_user_model, authenticate, login
-from django.contrib.auth.models import update_last_login
 
 from advent_backend import settings
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
-
-
 
 
 class TaskListView(generics.ListAPIView):
@@ -48,11 +45,23 @@ class TaskResponseListCreateView(generics.ListCreateAPIView):
 
 User = get_user_model()
 
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = RegisterSerializer
-    schema = AutoSchema()
+class RegistrationView(APIView):
+    """
+    View for user registration
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handle user registration
+        """
+        serializer = RegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Registration successful. Check your email for verification code.'
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
@@ -203,6 +212,10 @@ class LoginView(APIView):
                 'error': 'Please provide both email and password'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        user_and_active = User.objects.filter(username=username).first()
+        if not user_and_active or not user_and_active.is_active:
+            return Response({"error": "User is not activated or not registered"})
+
         # Authenticate user
         user = authenticate(username=username, password=password)
 
@@ -228,6 +241,41 @@ class LoginView(APIView):
 
 
 
+class LogoutView(APIView):
+    """
+    API View for user logout using Django REST Framework
+    Supports token blacklisting with JWT
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Handle user logout
+        Blacklists the refresh token to invalidate it
+        :param request: HTTP request from authenticated user
+        :return: Response indicating successful logout
+        """
+        try:
+            # Get the refresh token from the request
+            refresh_token = request.data.get('refresh_token')
+
+            if not refresh_token:
+                return Response({
+                    'error': 'Refresh token is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklist the refresh token
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({
+                'message': 'Successfully logged out'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'error': 'Invalid token or logout failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 @extend_schema(
     tags=["Authentication"],
@@ -252,3 +300,51 @@ class LoginView(APIView):
 class CustomRevokeTokenView(RevokeTokenView):
     """Custom wrapper for RevokeTokenView to include schema."""
     pass
+
+class EmailVerificationView(APIView):
+    """
+    View for email verification
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Verify email using provided code
+        """
+        email = request.data.get('email')
+        code = request.data.get('verification_code')
+
+        # Validate input
+        if not email or not code:
+            return Response({
+                'error': 'Email and verification code are required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Find user and verification record
+            user = User.objects.get(email=email, is_active=False)
+            verification = EmailVerification.objects.get(
+                user=user,
+                verification_code=code
+            )
+
+            # Activate user
+            user.is_active = True
+            user.save()
+
+            # Delete verification record
+            verification.delete()
+
+            return Response({
+                'message': 'Email successfully verified. You can now log in.'
+            }, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({
+                'error': 'Invalid email or user already activated'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except EmailVerification.DoesNotExist:
+            return Response({
+                'error': 'Invalid or expired verification code'
+            }, status=status.HTTP_400_BAD_REQUEST)

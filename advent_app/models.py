@@ -63,3 +63,19 @@ class TaskResponse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="response")
     recorded_answer = models.TextField(null=True)
     is_correct = models.BooleanField(default=True)
+
+class EmailVerification(models.Model):
+    """
+    Model to store email verification codes
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    verification_code = models.CharField(max_length=6, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def generate_verification_code(self):
+        """
+        Generate a unique 6-digit verification code
+        """
+        self.verification_code = get_random_string(length=6, allowed_chars='0123456789')
+        self.save()
+        return self.verification_code
