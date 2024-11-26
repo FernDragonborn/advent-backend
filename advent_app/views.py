@@ -2,11 +2,12 @@ from audioop import reverse
 from email.message import EmailMessage
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from drf_spectacular.openapi import AutoSchema
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasReadWriteScope
+from oauth2_provider.views import RevokeTokenView
 
 from advent_app.Forms import EmailAuthenticationForm
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegisterSerializer,
@@ -20,6 +21,7 @@ from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
 
 from advent_backend import settings
+
 
 
 class TaskListView(generics.ListAPIView):
@@ -175,19 +177,17 @@ from drf_spectacular.utils import extend_schema
     },
 )
 def custom_login_view(request):
-    if request.method == 'POST':
-        form = EmailAuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('home')  # Або інший маршрут після логіну
-    else:
-        form = EmailAuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+    if not request.method == 'POST':
+        return JsonResponse({'message': 'Invalid request method'}, status=400)
 
+    form = EmailAuthenticationForm(data=request.POST)
+    if not form.is_valid():
+        return JsonResponse({'message': 'Invalid credentials'}, status=400)
 
-from oauth2_provider.views import RevokeTokenView
-from drf_spectacular.utils import extend_schema
+    user = form.get_user()
+    login(request, user)
+    return JsonResponse({'message': 'Login successful'}, status=200)
+
 
 @extend_schema(
     tags=["Authentication"],
