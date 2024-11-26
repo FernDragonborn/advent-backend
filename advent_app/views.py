@@ -194,13 +194,13 @@ class LoginView(APIView):
         :param request: HTTP request containing login credentials
         :return: Response with authentication token or error message
         """
-        username = request.data.get('username')
+        username = request.data.get('email')
         password = request.data.get('password')
 
         # Validate input
         if not username or not password:
             return Response({
-                'error': 'Please provide both username and password'
+                'error': 'Please provide both email and password'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         # Authenticate user
