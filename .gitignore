@@ -1,6 +1,7 @@
 .env
 media/
 src/ 
+static/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
