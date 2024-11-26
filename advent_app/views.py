@@ -9,18 +9,22 @@ from drf_spectacular.openapi import AutoSchema
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasReadWriteScope
 from oauth2_provider.views import RevokeTokenView
 
-from advent_app.Forms import EmailAuthenticationForm
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegisterSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
                                     ResetPasswordEmailRequestSerializer)
 from advent_app.models import User, Task, TaskResponse
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
 
 from advent_backend import settings
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 
 
@@ -176,17 +180,53 @@ from drf_spectacular.utils import extend_schema
         400: {"type": "object", "properties": {"error": {"type": "string"}}},
     },
 )
-def custom_login_view(request):
-    if not request.method == 'POST':
-        return JsonResponse({'message': 'Invalid request method'}, status=400)
 
-    form = EmailAuthenticationForm(data=request.POST)
-    if not form.is_valid():
-        return JsonResponse({'message': 'Invalid credentials'}, status=400)
+class LoginView(APIView):
+    """
+    API View for user login using Django REST Framework
+    Supports token-based authentication with JWT
+    """
+    permission_classes = [AllowAny]
 
-    user = form.get_user()
-    login(request, user)
-    return JsonResponse({'message': 'Login successful'}, status=200)
+    def post(self, request):
+        """
+        Handle user login attempt
+        :param request: HTTP request containing login credentials
+        :return: Response with authentication token or error message
+        """
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        # Validate input
+        if not username or not password:
+            return Response({
+                'error': 'Please provide both username and password'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+
+        if user:
+            # If authentication succeeds
+            login(request, user)
+
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user_id': user.id,
+                'username': user.username
+            }, status=status.HTTP_200_OK)
+
+        # If authentication fails
+        return Response({
+            'error': 'Invalid Credentials'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
 
 
 @extend_schema(
