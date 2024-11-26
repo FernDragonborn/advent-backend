@@ -21,6 +21,9 @@ class User(AbstractUser):
         verbose_name="Стать"
     )
     USERNAME_FIELD = 'email'
+    email = models.EmailField(unique=True)
+    REQUIRED_FIELDS = []
+
     @property
     def group(self):
         group = None
