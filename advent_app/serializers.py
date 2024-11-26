@@ -9,7 +9,7 @@ from django.contrib.auth.password_validation import validate_password
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'full_name', 'address', 'region', 'grade')
+        fields = ('username', 'email', 'gender', 'region', 'grade')
         read_only_fields = ('username', 'email')
 
 
@@ -28,11 +28,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'password2', 'email', 'full_name', 'address', 'region', 'grade')
+        fields = ('username', 'password', 'password2', 'email', 'gender', 'region', 'grade')
         extra_kwargs = {
             'email': {'required': True},
-            'full_name': {'required': True},
-            'address': {'required': True},
+            'gender': {'required': True},
         }
 
     def validate(self, attrs):
@@ -43,10 +42,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password2')
         user = User.objects.create(
-            username=validated_data['username'],
+            username=validated_data['email'],
             email=validated_data['email'],
-            full_name=validated_data['full_name'],
-            address=validated_data['address'],
+            gender=validated_data['gender'],
             region=validated_data.get('region', ''),
             grade=validated_data.get('grade', ''),
         )
