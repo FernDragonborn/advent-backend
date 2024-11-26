@@ -2,11 +2,24 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
 class User(AbstractUser):
-    address = models.CharField(max_length=255, null=False)
-    full_name = models.CharField(max_length=255, null=False)
     region = models.CharField(max_length=255, null=True, blank=True)
     grade = models.CharField(max_length=50, null=True, blank=True)
+    class Gender(models.TextChoices):
+        MALE = 'M', 'Чоловік'
+        FEMALE = 'F', 'Жінка'
+        #OTHER = 'O', 'Інше'
+
+    gender = models.CharField(
+        max_length=1,
+        choices=Gender.choices,
+        null=True,
+        blank=True,
+        verbose_name="Стать"
+    )
 
     @property
     def group(self):
@@ -18,6 +31,7 @@ class User(AbstractUser):
         else:
             group = 2
         return group
+
     
 class TaskGroups(models.TextChoices):
     FIRST = "First group"
