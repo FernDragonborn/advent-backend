@@ -4,6 +4,7 @@ from email.message import EmailMessage
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from drf_spectacular.openapi import AutoSchema
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasReadWriteScope
 
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegisterSerializer,
@@ -22,7 +23,8 @@ from advent_backend import settings
 class TaskListView(generics.ListAPIView):
     serialzer_class = TaskSerializer
     permission_classes = (IsAuthenticated,)
-
+    schema = AutoSchema()
+    
     def get_queryset(self):
         group = self.request.user.group
         return Task.objects.filter(group=group)
@@ -30,7 +32,8 @@ class TaskListView(generics.ListAPIView):
 class TaskResponseListCreateView(generics.ListCreateAPIView):
     serializer_class = TaskResponseSerializer
     permission_classes = (IsAuthenticated,)
-
+    schema = AutoSchema()
+    
     def get_queryset(self):
         return TaskResponse.objects.filter(user=self.request.user)
 
@@ -41,13 +44,14 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
-
+    schema = AutoSchema()
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, TokenHasReadWriteScope)
     serializer_class = UserSerializer
-
+    schema = AutoSchema()
+    
     def get_object(self):
         return self.request.user
 
@@ -56,7 +60,8 @@ class ChangePasswordView(generics.UpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
-
+    schema = AutoSchema()
+    
     def get_object(self, queryset=None):
         return self.request.user
 
@@ -80,7 +85,8 @@ class ChangePasswordView(generics.UpdateAPIView):
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
-
+    schema = AutoSchema()
+    
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
@@ -107,7 +113,8 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
-
+    schema = AutoSchema()
+    
     def get(self, request):
         token = request.GET.get('token')
         uidb64 = request.GET.get('uidb64')
@@ -125,8 +132,73 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
-
+    schema = AutoSchema()
+    
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({"detail": "Пароль успішно змінено."}, status=status.HTTP_200_OK)
+
+from oauth2_provider.views import TokenView
+from drf_spectacular.utils import extend_schema
+
+@extend_schema(
+    tags=["Authentication"],
+    operation_id="token_obtain",
+    description="Отримання токену через OAuth2",
+    request={
+        "application/x-www-form-urlencoded": {
+            "type": "object",
+            "properties": {
+                "grant_type": {"type": "string", "example": "password"},
+                "client_id": {"type": "string", "example": "your-client-id"},
+                "client_secret": {"type": "string", "example": "your-client-secret"},
+                "username": {"type": "string", "example": "user@example.com"},
+                "password": {"type": "string", "example": "your-password"},
+            },
+            "required": ["grant_type", "client_id", "client_secret", "username", "password"],
+        }
+    },
+    responses={
+        200: {
+            "type": "object",
+            "properties": {
+                "access_token": {"type": "string"},
+                "refresh_token": {"type": "string"},
+                "expires_in": {"type": "integer"},
+                "token_type": {"type": "string", "example": "Bearer"},
+            },
+        },
+        400: {"type": "object", "properties": {"error": {"type": "string"}}},
+    },
+)
+class CustomTokenView(TokenView):
+    """Custom wrapper for TokenView to include schema."""
+    pass
+
+from oauth2_provider.views import RevokeTokenView
+from drf_spectacular.utils import extend_schema
+
+@extend_schema(
+    tags=["Authentication"],
+    operation_id="token_revoke",
+    description="Відкликання токена (доступу або оновлення) через OAuth2.",
+    request={
+        "application/x-www-form-urlencoded": {
+            "type": "object",
+            "properties": {
+                "token": {"type": "string", "example": "your-access-or-refresh-token"},
+                "client_id": {"type": "string", "example": "your-client-id"},
+                "client_secret": {"type": "string", "example": "your-client-secret"},
+            },
+            "required": ["token", "client_id", "client_secret"],
+        }
+    },
+    responses={
+        200: {"type": "object", "properties": {"success": {"type": "boolean", "example": True}}},
+        400: {"type": "object", "properties": {"error": {"type": "string"}}},
+    },
+)
+class CustomRevokeTokenView(RevokeTokenView):
+    """Custom wrapper for RevokeTokenView to include schema."""
+    pass
