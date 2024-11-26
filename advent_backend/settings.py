@@ -30,7 +30,7 @@ SECRET_KEY = env('SECRET_KEY')
 #ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
 ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ["*", "http://localhost:3000"]
 
 CORS_ORIGIN_ALLOW_ALL = True
 
