@@ -1,3 +1,4 @@
+import requests
 from audioop import reverse
 from email.message import EmailMessage
 
@@ -8,7 +9,7 @@ from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
 
 from drf_spectacular.openapi import AutoSchema
-from oauth2_provider.contrib.rest_framework.permissions import TokenHasReadWriteScope
+from oauth2_provider.models import Application
 from oauth2_provider.views import RevokeTokenView
 
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegistrationSerializer,
@@ -29,21 +30,23 @@ class TaskListView(generics.ListAPIView):
     serialzer_class = TaskSerializer
     permission_classes = (IsAuthenticated,)
     schema = AutoSchema()
-    
+
     def get_queryset(self):
         group = self.request.user.group
         return Task.objects.filter(group=group)
-    
+
+
 class TaskResponseListCreateView(generics.ListCreateAPIView):
     serializer_class = TaskResponseSerializer
     permission_classes = (IsAuthenticated,)
     schema = AutoSchema()
-    
+
     def get_queryset(self):
         return TaskResponse.objects.filter(user=self.request.user)
 
 
 User = get_user_model()
+
 
 class RegistrationView(APIView):
     """
@@ -63,12 +66,13 @@ class RegistrationView(APIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
     schema = AutoSchema()
-    
+
     def get_object(self):
         return self.request.user
 
@@ -78,7 +82,7 @@ class ChangePasswordView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
     schema = AutoSchema()
-    
+
     def get_object(self, queryset=None):
         return self.request.user
 
@@ -103,7 +107,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
     schema = AutoSchema()
-    
+
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
@@ -126,12 +130,14 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             )
             email.send(fail_silently=False)
 
-        return Response({"detail": "Якщо електронна пошта існує у системі, ви отримаєте лист для скидання пароля."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Якщо електронна пошта існує у системі, ви отримаєте лист для скидання пароля."},
+                        status=status.HTTP_200_OK)
+
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
     schema = AutoSchema()
-    
+
     def get(self, request):
         token = request.GET.get('token')
         uidb64 = request.GET.get('uidb64')
@@ -147,17 +153,20 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
         except Exception as e:
             return Response({"error": "Токен скидання пароля невірний."}, status=status.HTTP_401_UNAUTHORIZED)
 
+
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
     schema = AutoSchema()
-    
+
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({"detail": "Пароль успішно змінено."}, status=status.HTTP_200_OK)
 
+
 from oauth2_provider.views import TokenView
 from drf_spectacular.utils import extend_schema
+
 
 @extend_schema(
     tags=["Authentication"],
@@ -189,7 +198,6 @@ from drf_spectacular.utils import extend_schema
         400: {"type": "object", "properties": {"error": {"type": "string"}}},
     },
 )
-
 class LoginView(APIView):
     """
     API View for user login using Django REST Framework
@@ -239,8 +247,6 @@ class LoginView(APIView):
         }, status=status.HTTP_401_UNAUTHORIZED)
 
 
-
-
 class LogoutView(APIView):
     """
     API View for user logout using Django REST Framework
@@ -277,6 +283,7 @@ class LogoutView(APIView):
                 'error': 'Invalid token or logout failed'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+
 @extend_schema(
     tags=["Authentication"],
     operation_id="token_revoke",
@@ -300,6 +307,7 @@ class LogoutView(APIView):
 class CustomRevokeTokenView(RevokeTokenView):
     """Custom wrapper for RevokeTokenView to include schema."""
     pass
+
 
 class EmailVerificationView(APIView):
     """
@@ -348,3 +356,115 @@ class EmailVerificationView(APIView):
             return Response({
                 'error': 'Invalid or expired verification code'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GoogleOAuthView(APIView):
+    """
+    View to handle Google OAuth authentication using Django OAuth Toolkit
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Validate Google OAuth token and create/authenticate user
+        """
+        # Get Google access token from request
+        google_access_token = request.data.get('access_token')
+
+        if not google_access_token:
+            return Response({
+                'error': 'Google access token is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Verify Google token
+            google_response = requests.get(
+                'https://www.googleapis.com/oauth2/v3/userinfo',
+                params={'access_token': google_access_token}
+            )
+            google_data = google_response.json()
+
+            # Extract user information
+            email = google_data.get('email')
+            name = google_data.get('name')
+
+            if not email:
+                return Response({
+                    'error': 'Unable to retrieve email from Google'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Atomically create or get user
+            with transaction.atomic():
+                # Try to get existing user or create new
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={
+                        'username': email.split('@')[0],
+                        'is_active': True
+                    }
+                )
+
+            # Get or create OAuth application
+            try:
+                oauth_app = Application.objects.get(
+                    client_id=settings.OAUTH_CLIENT_ID
+                )
+            except Application.DoesNotExist:
+                oauth_app = Application.objects.create(
+                    client_id=settings.OAUTH_CLIENT_ID,
+                    client_secret=settings.OAUTH_CLIENT_SECRET,
+                    client_type=Application.CLIENT_CONFIDENTIAL,
+                    authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
+                    name='Google OAuth App'
+                )
+
+            # Generate OAuth token
+            token_view = TokenView()
+            token_response = token_view.post(request._request)
+
+            return Response({
+                'user_id': user.id,
+                'email': user.email,
+                'is_new_user': created,
+                'access_token': token_response.data.get('access_token'),
+                'refresh_token': token_response.data.get('refresh_token')
+            }, status=status.HTTP_200_OK)
+
+        except requests.RequestException:
+            return Response({
+                'error': 'Failed to validate Google token'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GoogleOAuthURLView(APIView):
+    """
+    View to generate Google OAuth authorization URL
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        """
+        Generate OAuth2 authorization URL for Google
+        """
+        base_url = 'https://accounts.google.com/o/oauth2/v2/auth'
+        params = {
+            'client_id': settings.GOOGLE_CLIENT_ID,
+            'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+            'response_type': 'code',
+            'scope': 'openid email profile',
+            'access_type': 'offline',
+            'prompt': 'consent'
+        }
+
+        # Construct full authorization URL
+        from urllib.parse import urlencode
+        authorization_url = f"{base_url}?{urlencode(params)}"
+
+        return Response({
+            'authorization_url': authorization_url
+        }, status=status.HTTP_200_OK)
