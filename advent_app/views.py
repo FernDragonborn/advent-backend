@@ -2,11 +2,13 @@ from audioop import reverse
 from email.message import EmailMessage
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.shortcuts import render, redirect
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from drf_spectacular.openapi import AutoSchema
 from oauth2_provider.contrib.rest_framework.permissions import TokenHasReadWriteScope
 
+from advent_app.Forms import EmailAuthenticationForm
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegisterSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
                                     ResetPasswordEmailRequestSerializer)
@@ -14,7 +16,7 @@ from advent_app.models import User, Task, TaskResponse
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
 
 from advent_backend import settings
@@ -172,9 +174,17 @@ from drf_spectacular.utils import extend_schema
         400: {"type": "object", "properties": {"error": {"type": "string"}}},
     },
 )
-class CustomTokenView(TokenView):
-    """Custom wrapper for TokenView to include schema."""
-    pass
+def custom_login_view(request):
+    if request.method == 'POST':
+        form = EmailAuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')  # Або інший маршрут після логіну
+    else:
+        form = EmailAuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
 
 from oauth2_provider.views import RevokeTokenView
 from drf_spectacular.utils import extend_schema

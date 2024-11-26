@@ -20,7 +20,7 @@ class User(AbstractUser):
         blank=True,
         verbose_name="Стать"
     )
-
+    USERNAME_FIELD = 'email'
     @property
     def group(self):
         group = None
