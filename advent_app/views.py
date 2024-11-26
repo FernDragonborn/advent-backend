@@ -3,6 +3,7 @@ from audioop import reverse
 from email.message import EmailMessage
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.exceptions import BadRequest
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth import get_user_model, authenticate, login
@@ -191,9 +192,11 @@ class LoginView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         user_and_active = User.objects.filter(username=username).first()
-        if not user_and_active or not user_and_active.is_active:
-            return Response({"error": "User is not activated or not registered"})
-
+        if not user_and_active:
+            return BadRequest({"error": "User is not registered"})
+        #if not user_and_active.is_active:
+        #    return BadRequest({"error": "User is not activated", "is_activated": False})
+        
         # Authenticate user
         user = authenticate(username=username, password=password)
 

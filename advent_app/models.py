@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.crypto import get_random_string
+
 
 class User(AbstractUser):
     region = models.CharField(max_length=255, null=True, blank=True)
