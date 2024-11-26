@@ -13,8 +13,8 @@ from advent_backend import settings
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'gender', 'region', 'grade')
-        read_only_fields = ('username', 'email')
+        fields = ('username', 'email', 'gender', 'region', 'grade', 'phone_number')
+        read_only_fields = 'email'
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -44,6 +44,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
+            phone_number=validated_data['phone_number'],
             is_active=False  # Set user as inactive initially
         )
 

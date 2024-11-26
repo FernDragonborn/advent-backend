@@ -8,6 +8,7 @@ from django.db import models
 class User(AbstractUser):
     region = models.CharField(max_length=255, null=True, blank=True)
     grade = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     class Gender(models.TextChoices):
         MALE = 'M', 'Чоловік'
         FEMALE = 'F', 'Жінка'
