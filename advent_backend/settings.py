@@ -30,7 +30,7 @@ SECRET_KEY = env('SECRET_KEY')
 #ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
 ALLOWED_HOSTS = ["*"]
 
-CORS_ORIGIN_ALLOW_ALL = DEBUG
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'verify_email.apps.VerifyEmailConfig',
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
 
     'advent_app',
 ]
@@ -75,6 +76,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'advent_backend.urls'
