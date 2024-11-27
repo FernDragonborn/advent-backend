@@ -18,11 +18,8 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     name = models.CharField(
         max_length=150,
-        unique=True,
-        validators=[validate_name],  # Додаємо кастомний валідатор
-        error_messages={
-            'unique': "A user with that username already exists.",
-        },
+        unique=False,
+        validators=[validate_name],  #
     )
     
     class Gender(models.TextChoices):
@@ -37,9 +34,10 @@ class User(AbstractUser):
         blank=True,
         verbose_name="Стать"
     )
+    
+    email = models.EmailField(unique=True) 
     USERNAME_FIELD = 'email'
-    email = models.EmailField(unique=True)
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
     @property
     def group(self):
