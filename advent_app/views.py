@@ -182,23 +182,23 @@ class LoginView(APIView):
         :param request: HTTP request containing login credentials
         :return: Response with authentication token or error message
         """
-        username = request.data.get('email')
+        email = request.data.get('email')
         password = request.data.get('password')
 
         # Validate input
-        if not username or not password:
+        if not email or not password:
             return Response({
                 'error': 'Please provide both email and password'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        user_and_active = User.objects.filter(username=username).first()
+        user_and_active = User.objects.filter(username=email).first()
         if not user_and_active:
             return BadRequest({"error": "User is not registered"})
         if not user_and_active.is_active:
             return BadRequest({"error": "User is not activated", "is_activated": False})
         
         # Authenticate user
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
 
         if user:
             # If authentication succeeds
