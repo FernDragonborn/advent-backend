@@ -8,7 +8,7 @@ from jsonschema.exceptions import ValidationError
 
 def validate_username(value):
     # Регулярний вираз: тільки українські букви (великі та малі) і пробіли
-    if not re.match(r'^[а-яА-ЯїЇєЄіІґҐ ]+$', value):
+    if not re.match(r'^[\p{L} ]+$', value):
         raise ValidationError('Username may only contain Ukrainian letters and spaces.')
     
 class User(AbstractUser):
