@@ -1,7 +1,3 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.contrib.auth.models import AbstractUser
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.crypto import get_random_string
@@ -74,8 +70,8 @@ class EmailVerification(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     verification_code = models.CharField(max_length=6, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def generate_verification_code(self):
+    
+    def generate_verification_code(self) -> str:
         """
         Generate a unique 6-digit verification code
         """

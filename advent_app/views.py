@@ -300,24 +300,7 @@ class EmailVerificationView(APIView):
             return Response({
                 'error': 'Email and verification code are required'
             }, status=status.HTTP_400_BAD_REQUEST)
-        if(code == '0000'):
-            # Find user and verification record
-            user = User.objects.get(email=email, is_active=False)
-            verification = EmailVerification.objects.get(
-                user=user,
-            )
 
-            # Activate user
-            user.is_active = True
-            user.save()
-
-            # Delete verification record
-            verification.delete()
-
-            return Response({
-                'message': 'Email successfully verified. You can now log in.'
-            }, status=status.HTTP_200_OK)
-        
         try:
             # Find user and verification record
             user = User.objects.get(email=email, is_active=False)

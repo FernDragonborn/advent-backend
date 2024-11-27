@@ -52,9 +52,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
         )
 
         # Create email verification record
-        verification = EmailVerification.objects.create(user=user)
-        code = verification.generate_verification_code()
-
+        email_verification = EmailVerification.objects.create(user=user)
+        code = email_verification.generate_verification_code()
+        
         # Send verification email
         send_mail(
             'Verify Your Email',
