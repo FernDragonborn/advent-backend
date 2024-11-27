@@ -19,7 +19,7 @@ class User(AbstractUser):
     name = models.CharField(
         max_length=150,
         unique=False,
-        validators=[validate_name],  #
+        validators=[validate_name],
     )
     
     class Gender(models.TextChoices):
