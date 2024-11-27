@@ -7,7 +7,7 @@ from jsonschema.exceptions import ValidationError
 from regex import regex
 
 
-def validate_username(value):
+def validate_name(value):
     # Регулярний вираз: тільки українські букви (великі та малі) і пробіли
     if not regex.match(r'^[\p{L} ]+$', value):
         raise ValidationError('Username may only contain Ukrainian letters and spaces.')
@@ -16,10 +16,10 @@ class User(AbstractUser):
     region = models.CharField(max_length=255, null=True, blank=True)
     grade = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    username = models.CharField(
+    name = models.CharField(
         max_length=150,
         unique=True,
-        validators=[validate_username],  # Додаємо кастомний валідатор
+        validators=[validate_name],  # Додаємо кастомний валідатор
         error_messages={
             'unique': "A user with that username already exists.",
         },
