@@ -1,12 +1,29 @@
+import re
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.crypto import get_random_string
+from jsonschema.exceptions import ValidationError
 
 
+def validate_username(value):
+    # Регулярний вираз: тільки українські букви (великі та малі) і пробіли
+    if not re.match(r'^[а-яА-ЯїЇєЄіІґҐ ]+$', value):
+        raise ValidationError('Username may only contain Ukrainian letters and spaces.')
+    
 class User(AbstractUser):
     region = models.CharField(max_length=255, null=True, blank=True)
     grade = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[validate_username],  # Додаємо кастомний валідатор
+        error_messages={
+            'unique': "A user with that username already exists.",
+        },
+    )
+    
     class Gender(models.TextChoices):
         MALE = 'M', 'Чоловік'
         FEMALE = 'F', 'Жінка'
