@@ -4,11 +4,12 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.crypto import get_random_string
 from jsonschema.exceptions import ValidationError
+from regex import regex
 
 
 def validate_username(value):
     # Регулярний вираз: тільки українські букви (великі та малі) і пробіли
-    if not re.match(r'^[\p{L} ]+$', value):
+    if not regex.match(r'^[\p{L} ]+$', value):
         raise ValidationError('Username may only contain Ukrainian letters and spaces.')
     
 class User(AbstractUser):
