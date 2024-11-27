@@ -40,12 +40,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
         """
         Create user and generate verification code
         """
+        name = validated_data['username']
         validated_data['username'] = validated_data.get('email', 'blank-username')
 
         user = User.objects.create_user(
             username=validated_data['email'],
             email=validated_data['email'],
-            name=validated_data['username'],
+            name=name,
             password=validated_data['password'],
             phone_number=validated_data['phone_number'],
             gender=validated_data['gender'],
