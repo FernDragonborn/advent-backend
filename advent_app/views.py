@@ -4,6 +4,7 @@ from email.message import EmailMessage
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import BadRequest
+from django.http import HttpResponse
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth import get_user_model, authenticate, login
@@ -193,13 +194,13 @@ class LoginView(APIView):
 
         user_and_active = User.objects.filter(username=email).first()
         if not user_and_active:
-            return BadRequest({"error": "User is not registered"})
+            return Response({"error": "User is not registered"}, status=status.HTTP_400_BAD_REQUEST)
         if not user_and_active.is_active:
-            return BadRequest({"error": "User is not activated", "is_activated": False})
+            return Response({"error": "User is not activated", "is_activated": False}, status=status.HTTP_400_BAD_REQUEST)
         
         # Authenticate user
         user = authenticate(email=email, password=password)
-
+        
         if user:
             # If authentication succeeds
             login(request, user)
