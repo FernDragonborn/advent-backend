@@ -33,20 +33,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'region', 'grade', 'gender','phone_number']
+        fields = ['name', 'email', 'password', 'region', 'grade', 'gender','phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         """
         Create user and generate verification code
         """
-        name = validated_data['username']
-        validated_data['username'] = validated_data.get('email', 'blank-username')
+        validated_data['username'] = validated_data.get('email', 'default_username')
 
         user = User.objects.create_user(
             username=validated_data['email'],
             email=validated_data['email'],
-            name=name,
+            name=validated_data['name'],
             password=validated_data['password'],
             phone_number=validated_data['phone_number'],
             gender=validated_data['gender'],
