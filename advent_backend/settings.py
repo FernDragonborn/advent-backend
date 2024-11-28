@@ -187,7 +187,7 @@ GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'live.smtp.mailtrap.io'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_ID')
