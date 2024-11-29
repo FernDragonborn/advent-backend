@@ -19,7 +19,7 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('api/admin/', admin.site.urls),
     path('api/auth/', include('advent_app.urls')), 
     #path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),  # OAuth2 Toolkit URLs
 

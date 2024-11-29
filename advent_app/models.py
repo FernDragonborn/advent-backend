@@ -7,11 +7,6 @@ from jsonschema.exceptions import ValidationError
 from regex import regex
 
 
-def validate_name(value):
-    # Регулярний вираз: тільки українські букви (великі та малі) і пробіли
-    if not regex.match(r'^[\p{L} ]+$', value):
-        raise ValidationError('Username may only contain Ukrainian letters and spaces.')
-    
 class User(AbstractUser):
     region = models.CharField(max_length=255, null=True, blank=True)
     grade = models.CharField(max_length=50, null=True, blank=True)
@@ -19,12 +14,12 @@ class User(AbstractUser):
     name = models.CharField(
         max_length=150,
         unique=False,
-        validators=[validate_name],
     )
     
     class Gender(models.TextChoices):
         MALE = 'M', 'Чоловік'
         FEMALE = 'F', 'Жінка'
+        UNDEFINED = 'U', 'Не хочу говорити'
         #OTHER = 'O', 'Інше'
 
     gender = models.CharField(

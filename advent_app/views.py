@@ -1,5 +1,5 @@
 import requests
-from audioop import reverse
+from django.urls import reverse
 from email.message import EmailMessage
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -10,6 +10,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
 from drf_social_oauth2.views import TokenView
+from django.core.mail import send_mail
 
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import extend_schema
@@ -17,7 +18,7 @@ from oauth2_provider.models import Application
 from oauth2_provider.views import RevokeTokenView
 from psycopg import transaction
 
-from advent_app.serializers import (UserSerializer, TaskSerializer, TaskResponseSerializer, RegistrationSerializer,
+from advent_app.serializers import (UserSerializer, TaskSerializer, TaskFullSerializer, TaskResponseSerializer, RegistrationSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
                                     ResetPasswordEmailRequestSerializer)
 from advent_app.models import User, Task, TaskResponse, EmailVerification
@@ -48,6 +49,12 @@ class TaskResponseListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return TaskResponse.objects.filter(user=self.request.user)
+
+class TaskItemView(generics.RetrieveAPIView):
+    serializer_class = TaskFullSerializer
+    permission_classes = (IsAuthenticated,)
+    schema = AutoSchema()
+    lookup_field = 'id'
 
 
 User = get_user_model()
@@ -85,7 +92,6 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
 
 class ChangePasswordView(generics.UpdateAPIView):
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
     schema = AutoSchema()
 
@@ -112,6 +118,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
+    permission_classes = [AllowAny]
     schema = AutoSchema()
 
     def post(self, request):
@@ -120,21 +127,21 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
 
-        if User.objects.filter(email=email).exists():
+        if User.objects.filter(email=email, is_active=True).exists():
             user = User.objects.get(email=email)
             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
-            reset_url = reverse('password_reset_confirm')
+            reset_url = "reset-password"
 
-            absurl = f"{request.scheme}://{request.get_host()}{reset_url}?uidb64={uidb64}&token={token}"
+            absurl = f"{request.scheme}://{request.get_host()}/{reset_url}?uidb64={uidb64}&token={token}"
             email_body = f"Привіт,\n\nВи отримали цей лист, тому що запитали скидання пароля для вашого облікового запису.\nПерейдіть за посиланням, щоб скинути пароль:\n{absurl}\n\nЯкщо ви не запитували скидання пароля, ігноруйте цей лист.\n\nДякуємо!"
-            email = EmailMessage(
+            send_mail(
                 'Скидання пароля',
-                email_body,
+                'Скидання пароля',
                 settings.DEFAULT_FROM_EMAIL,
                 [email],
+                html_message=email_body
             )
-            email.send(fail_silently=False)
 
         return Response({"detail": "Якщо електронна пошта існує у системі, ви отримаєте лист для скидання пароля."},
                         status=status.HTTP_200_OK)
@@ -142,6 +149,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
+    permission_classes = [AllowAny]
     schema = AutoSchema()
 
     def get(self, request):
@@ -162,6 +170,7 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
+    permission_classes = [AllowAny]
     schema = AutoSchema()
 
     def post(self, request):
@@ -294,7 +303,7 @@ class EmailVerificationView(APIView):
         Verify email using provided code
         """
         email = request.data.get('email')
-        code = request.data.get('verification_code')
+        code = request.data.get('code')
 
         # Validate input
         if not email or not code:
@@ -381,12 +390,12 @@ class GoogleOAuthView(APIView):
             # Get or create OAuth application
             try:
                 oauth_app = Application.objects.get(
-                    client_id=settings.OAUTH_CLIENT_ID
+                    client_id=settings.GOOGLE_CLIENT_ID
                 )
             except Application.DoesNotExist:
                 oauth_app = Application.objects.create(
-                    client_id=settings.OAUTH_CLIENT_ID,
-                    client_secret=settings.OAUTH_CLIENT_SECRET,
+                    client_id=settings.GOOGLE_CLIENT_SECRET,
+                    client_secret=settings.GOOGLE_CLIENT_ID,
                     client_type=Application.CLIENT_CONFIDENTIAL,
                     authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
                     name='Google OAuth App'

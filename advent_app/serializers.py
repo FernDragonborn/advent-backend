@@ -21,6 +21,10 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
 
+class TaskFullSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+
 class TaskResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskResponse

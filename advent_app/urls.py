@@ -10,7 +10,12 @@ from .views import (
     SetNewPasswordAPIView,
     LoginView,
     LogoutView,
+    GoogleOAuthView,
+    GoogleOAuthURLView,
     EmailVerificationView,
+   # TaskListView,
+    # TaskItemView,
+   # TastResponseListCreateView,
 )
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -26,6 +31,12 @@ urlpatterns = [
     path('revoke-token/', LogoutView.as_view(), name='token_revoke'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), 
 
+    # path('tasks/', TaskListView.as_view(), name='tasks_list'),
+    # path('tasks/<int:id>/', TaskItemView.as_view(), name='task_detail'),
+   # path('task-responses/', TaskResponseListCreateView.as_view(), name='task_responses_list_create'),
+
+    path('google-auth/', GoogleOAuthView.as_view(), name='google_auth'),
+    path('google-auth-url/', GoogleOAuthURLView.as_view(), name='google_auth_url'),
 
     # Endpoints для скидання пароля
     path('password-reset/', RequestPasswordResetEmail.as_view(), name='password_reset'),

@@ -185,14 +185,16 @@ SIMPLE_JWT = {
 
 GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'live.smtp.mailtrap.io'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_ID')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PW')
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'api' #os.environ.get('EMAIL_ID')
+EMAIL_HOST_PASSWORD = '68dc628cd55ac49faf701e9214940e19' #os.environ.get('EMAIL_PW')
 
-DEFAULT_FROM_EMAIL = 'noreply<no_reply@domain.com>'
+DEFAULT_FROM_EMAIL = 'noreply<no_reply@advent.teachforukraine.org>'
 
 AUTH_USER_MODEL = 'advent_app.User'
