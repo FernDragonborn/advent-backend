@@ -16,7 +16,6 @@ from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import extend_schema
 from oauth2_provider.models import Application
 from oauth2_provider.views import RevokeTokenView
-from psycopg import transaction
 
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskFullSerializer, TaskResponseSerializer, RegistrationSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
@@ -92,6 +91,7 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
 
 class ChangePasswordView(generics.UpdateAPIView):
     queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
     schema = AutoSchema()
 
