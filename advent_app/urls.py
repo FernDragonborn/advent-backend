@@ -13,9 +13,9 @@ from .views import (
     GoogleOAuthView,
     GoogleOAuthURLView,
     EmailVerificationView,
-   # TaskListView,
-    # TaskItemView,
-   # TastResponseListCreateView,
+    TaskListView,
+    TaskItemView,
+    TaskResponseListCreateView,
 )
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -31,9 +31,9 @@ urlpatterns = [
     path('revoke-token/', LogoutView.as_view(), name='token_revoke'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), 
 
-    # path('tasks/', TaskListView.as_view(), name='tasks_list'),
-    # path('tasks/<int:id>/', TaskItemView.as_view(), name='task_detail'),
-   # path('task-responses/', TaskResponseListCreateView.as_view(), name='task_responses_list_create'),
+    path('tasks/', TaskListView.as_view(), name='tasks_list'),
+    path('tasks/<int:id>/', TaskItemView.as_view(), name='task_detail'),
+    path('task-responses/', TaskResponseListCreateView.as_view(), name='task_responses_list_create'),
 
     path('google-auth/', GoogleOAuthView.as_view(), name='google_auth'),
     path('google-auth-url/', GoogleOAuthURLView.as_view(), name='google_auth_url'),

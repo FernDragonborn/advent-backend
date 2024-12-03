@@ -1,34 +1,28 @@
 import requests
-from django.urls import reverse
-from email.message import EmailMessage
-
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.core.exceptions import BadRequest
-from django.http import HttpResponse
-from django.utils.encoding import smart_str, smart_bytes
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
-from drf_social_oauth2.views import TokenView
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
-
+from django.utils.encoding import smart_str, smart_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from drf_social_oauth2.views import TokenView
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import extend_schema
 from oauth2_provider.models import Application
 from oauth2_provider.views import RevokeTokenView
-
-from advent_app.serializers import (UserSerializer, TaskSerializer, TaskFullSerializer, TaskResponseSerializer, RegistrationSerializer,
-                                    ChangePasswordSerializer, SetNewPasswordSerializer,
-                                    ResetPasswordEmailRequestSerializer)
-from advent_app.models import User, Task, TaskResponse, EmailVerification
+from psycopg import transaction
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
-from advent_backend import settings
-
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from advent_app.models import User, Task, TaskResponse, EmailVerification
+from advent_app.serializers import (UserSerializer, TaskSerializer, TaskFullSerializer, TaskResponseSerializer,
+                                    RegistrationSerializer,
+                                    ChangePasswordSerializer, SetNewPasswordSerializer,
+                                    ResetPasswordEmailRequestSerializer)
+from advent_backend import settings
 
 
 class TaskListView(generics.ListAPIView):

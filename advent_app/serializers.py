@@ -20,15 +20,17 @@ class UserSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
+        fields = '__all__'
 
 class TaskFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
+        fields = '__all__'
 
 class TaskResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskResponse
-
+        fields = '__all__'
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -39,6 +41,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ['name', 'email', 'password', 'region', 'grade', 'gender','phone_number']
         extra_kwargs = {'password': {'write_only': True}}
+        fields = ['__all__']
 
     def create(self, validated_data):
         """
