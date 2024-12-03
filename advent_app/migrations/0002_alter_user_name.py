@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='name',
-            field=models.CharField(max_length=150, validators=[advent_app.models.validate_name]),
+            field=models.CharField(max_length=150),
         ),
     ]

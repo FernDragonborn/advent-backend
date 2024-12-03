@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 ('region', models.CharField(blank=True, max_length=255, null=True)),
                 ('grade', models.CharField(blank=True, max_length=50, null=True)),
                 ('phone_number', models.CharField(blank=True, max_length=20, null=True)),
-                ('name', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=150, unique=True, validators=[advent_app.models.validate_name])),
+                ('name', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=150, unique=True)),
                 ('gender', models.CharField(blank=True, choices=[('M', 'Чоловік'), ('F', 'Жінка')], max_length=1, null=True, verbose_name='Стать')),
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
