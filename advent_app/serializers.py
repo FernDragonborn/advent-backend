@@ -20,15 +20,17 @@ class UserSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
+        fields = ['group', 'due_date', 'unlocks_artifact', 'intro_text']
 
 class TaskFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
+        fields = ['group', 'due_date', 'unlocks_artifact', 'intro_text', 'pk', 'intro_text', 'outro_text', 'task_test', 'task_image_1', 'task_image_2', 'task_image_3', 'correct_answer_1', 'correct_answer_2', 'correct_answer_3', 'points_award', 'unlocks_artifact']
 
 class TaskResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskResponse
-
+        fields = ['task', 'user', 'is_correct', 'recorded_answer']
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
