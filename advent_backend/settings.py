@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'captcha',
 
     'advent_app',
 ]
@@ -186,6 +187,9 @@ SIMPLE_JWT = {
 GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'live.smtp.mailtrap.io'

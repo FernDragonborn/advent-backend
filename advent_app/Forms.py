@@ -1,9 +1,11 @@
 ﻿from django.contrib.auth import authenticate
 from django import forms
+from captcha.fields import ReCaptchaField
 
 class EmailAuthenticationForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+    captcha = ReCaptchaField()
 
     def clean(self):
         email = self.cleaned_data.get('email')

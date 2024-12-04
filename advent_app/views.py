@@ -26,7 +26,7 @@ from advent_backend import settings
 
 
 class TaskListView(generics.ListAPIView):
-    serialzer_class = TaskSerializer
+    serialzer_class = TaskSerializer 
     permission_classes = (IsAuthenticated,)
     schema = AutoSchema()
 
