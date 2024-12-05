@@ -21,7 +21,7 @@ from advent_app.models import User, Task, TaskResponse, EmailVerification
 from advent_app.serializers import (UserSerializer, TaskSerializer, TaskFullSerializer, TaskResponseSerializer,
                                     RegistrationSerializer,
                                     ChangePasswordSerializer, SetNewPasswordSerializer,
-                                    ResetPasswordEmailRequestSerializer)
+                                    ResetPasswordEmailRequestSerializer, UserSerializerWithId)
 from advent_backend import settings
 
 
@@ -90,7 +90,7 @@ class RegistrationView(APIView):
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
+    serializer_class = UserSerializerWithId
     schema = AutoSchema()
 
     def get_object(self):

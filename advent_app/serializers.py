@@ -13,7 +13,13 @@ from advent_backend import settings
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'name', 'email', 'gender', 'region', 'grade', 'phone_number')
+        fields = ('name', 'email', 'gender', 'region', 'grade', 'phone_number')
+        read_only_fields = ['email']
+        
+class UserSerializerWithId(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','name', 'email', 'gender', 'region', 'grade', 'phone_number')
         read_only_fields = ['email']
 
 
