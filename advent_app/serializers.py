@@ -27,7 +27,6 @@ class UserSerializerWithId(serializers.ModelSerializer):
     
 
 
-
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
