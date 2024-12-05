@@ -89,7 +89,10 @@ class RegistrationView(APIView):
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.filter(is_active=True).annotate(
+    queryset = User.objects.filter(
+        is_active=True,
+        response__task__points_award__isnull=False
+    ).annotate(
         total_task_points=Sum('response__task__points_award')
     )
     permission_classes = (IsAuthenticated,)
