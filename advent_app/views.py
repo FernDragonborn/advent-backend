@@ -90,7 +90,7 @@ class RegistrationView(APIView):
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.annotate(
-        total_task_points=Sum('taskanswertasktask_point_award')
+        total_task_points=Sum('taskresponse__task__point_award')
     )
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializerWithId

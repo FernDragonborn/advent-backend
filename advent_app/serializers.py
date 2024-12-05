@@ -17,9 +17,10 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['email']
         
 class UserSerializerWithId(serializers.ModelSerializer):
+    total_task_points = serializers.IntegerField(read_only=True)
     class Meta:
         model = User
-        fields = ('id','name', 'email', 'gender', 'region', 'grade', 'phone_number')
+        fields = ('id','name', 'email', 'gender', 'region', 'grade', 'phone_number', 'total_task_points')
         read_only_fields = ['email']
 
 
