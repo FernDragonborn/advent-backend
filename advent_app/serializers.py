@@ -18,13 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['email']
         
 class UserSerializerWithId(serializers.ModelSerializer):
-    total_task_points = serializers.SerializerMethodField()
-    
-    def get_total_task_points(self, obj):
-        # Use annotate to calculate points in a single query
-        return TaskResponse.objects.filter(user=obj).aggregate(
-            total_points=Sum('task__point_award')
-        )['total_points'] or 0
+    total_task_points = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = User
