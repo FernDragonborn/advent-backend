@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.utils.encoding import smart_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from drf_social_oauth2.views import TokenView
@@ -89,8 +89,8 @@ class RegistrationView(APIView):
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.annotate(
-        total_task_points=Sum('taskresponse__task__point_award')
+    queryset = User.objects.filter(is_active=True).annotate(total_task_points=Sum(
+        F('response__task__point_award'))
     )
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializerWithId
