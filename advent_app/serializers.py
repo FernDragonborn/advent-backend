@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
+from django.db.models import Sum
 from django.utils.encoding import DjangoUnicodeDecodeError, smart_str
 from django.utils.http import urlsafe_base64_decode
 
@@ -17,11 +18,20 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['email']
         
 class UserSerializerWithId(serializers.ModelSerializer):
-    total_task_points = serializers.IntegerField(read_only=True)
+    total_task_points = serializers.SerializerMethodField()
+    
+    def get_total_task_points(self, obj):
+        # Use annotate to calculate points in a single query
+        return TaskResponse.objects.filter(user=obj).aggregate(
+            total_points=Sum('task__point_award')
+        )['total_points'] or 0
+    
     class Meta:
         model = User
         fields = ('id','name', 'email', 'gender', 'region', 'grade', 'phone_number', 'total_task_points')
         read_only_fields = ['email']
+    
+
 
 
 class TaskSerializer(serializers.ModelSerializer):
