@@ -11,7 +11,7 @@ class User(AbstractUser):
         max_length=150,
         unique=False,
     )
-    
+
     class Gender(models.TextChoices):
         MALE = 'M', 'Чоловік'
         FEMALE = 'F', 'Жінка'
@@ -25,8 +25,8 @@ class User(AbstractUser):
         blank=True,
         verbose_name="Стать"
     )
-    
-    email = models.EmailField(unique=True) 
+
+    email = models.EmailField(unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
@@ -41,7 +41,7 @@ class User(AbstractUser):
             group = 2
         return group
 
-    
+
 class TaskGroups(models.TextChoices):
     FIRST = "First group"
     SECOND = "Second group"
@@ -50,8 +50,10 @@ class TaskGroups(models.TextChoices):
 class Task(models.Model):
     group = models.CharField(choices=TaskGroups.choices, default=TaskGroups.FIRST, max_length=255)
     due_date = models.DateTimeField()
+    video_link = models.TextField(null=True, blank=True)
     intro_text = models.TextField(null=True)
-    outro_text = models.TextField(null=True) 
+    outro_text = models.TextField(null=True)
+    fail_text = models.TextField(null=True)
     intro_image = models.ImageField(null=True)
     teleport_image = models.ImageField(null=True)
     task_image_1 = models.ImageField(null=True)
@@ -81,7 +83,7 @@ class EmailVerification(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     verification_code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def generate_verification_code(self) -> str:
         """
         Generate a unique 6-digit verification code

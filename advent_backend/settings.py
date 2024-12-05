@@ -27,10 +27,8 @@ DEBUG = env('DEBUG')
 
 SECRET_KEY = env('SECRET_KEY')
 
-#ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(',')
-ALLOWED_HOSTS = ["*"]
-
-#CSRF_TRUSTED_ORIGINS = ["*", "http://localhost:3000"]
+ALLOWED_HOSTS = ['https://advent.teachforukraine.org']
+CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
 CORS_ORIGIN_ALLOW_ALL = True
 

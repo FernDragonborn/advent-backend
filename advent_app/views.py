@@ -26,13 +26,18 @@ from advent_backend import settings
 
 
 class TaskListView(generics.ListAPIView):
-    serialzer_class = TaskSerializer 
+    serializer_class = TaskSerializer 
     permission_classes = (IsAuthenticated,)
     schema = AutoSchema()
 
     def get_queryset(self):
-        group = self.request.user.group
-        return Task.objects.filter(group=group)
+        group_dict = {
+            1: "First group",
+            2: "Second group",
+            3: "Third group"
+        }
+        selected_group = group_dict[self.request.user.group]
+        return Task.objects.filter(group=selected_group).order_by('due_date')
 
 
 class TaskResponseListCreateView(generics.ListCreateAPIView):
@@ -49,6 +54,15 @@ class TaskItemView(generics.RetrieveAPIView):
     schema = AutoSchema()
     lookup_field = 'id'
 
+    def get_queryset(self):
+        return Task.objects.all()
+        #group_dict = {
+        #    1: "First group",
+        #    2: "Second group",
+        #    3: "Third group"
+        #}
+        #selected_group = group_dict[self.request.user.group]
+        #return Task.objects.filter(group=selected_group).order_by('due_date')
 
 User = get_user_model()
 
