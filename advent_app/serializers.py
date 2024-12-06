@@ -16,16 +16,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('name', 'email', 'gender', 'region', 'grade', 'phone_number')
         read_only_fields = ['email']
-        
+
 class UserSerializerWithId(serializers.ModelSerializer):
-    total_task_points = serializers.IntegerField(read_only=True)
+    total_task_points = serializers.SerializerMethodField(allow_null=True, default=0)
+    
+    def get_total_task_points(self, obj):
+      return sum(obj.response.values_list('task__points_award', flat=True)) or 0
     
     class Meta:
         model = User
         fields = ('id','name', 'email', 'gender', 'region', 'grade', 'phone_number', 'total_task_points')
         read_only_fields = ['email']
-    
-
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
