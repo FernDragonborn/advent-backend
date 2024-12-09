@@ -67,12 +67,15 @@ class Task(models.Model):
     correct_answer_3 = models.CharField(max_length=255)
     unlocks_artifact = models.BooleanField(default=False)
     points_award = models.SmallIntegerField(default=5, null=False)
-
+    
+    def __str__(self):
+        return f"{self.due_date} {self.group})"
 
 
 class TaskResponse(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="response")
+    created_at = models.DateTimeField(auto_now_add=True)
     recorded_answer = models.TextField(null=True)
     is_correct = models.BooleanField(default=True)
 

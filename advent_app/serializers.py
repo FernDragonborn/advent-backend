@@ -41,7 +41,8 @@ class TaskFullSerializer(serializers.ModelSerializer):
 class TaskResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskResponse
-        fields = ['id', 'task', 'user', 'is_correct', 'recorded_answer']
+        fields = ['id', 'task', 'user', 'is_correct', 'recorded_answer', 'created_at']
+        read_only_fields = ['created_at']
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
