@@ -2,6 +2,7 @@
 media/
 src/ 
 static/
+.flake8
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
